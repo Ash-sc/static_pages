@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Download</title>
+    <meta charset="utf-8">
+    <style type="text/css">
+      body {
+        margin: 0;
+        height: 100vh;
+        background: linear-gradient(35deg, #103E68, #A52E7D, #f92455c8, #F8644F, #FA534B, #FAA45B, #2780B8, #2B8EC9, #046DB0);
+        backdrop-filter: blur(10px);
+        font-family: fantasy;
+      }
+      body::before {
+        content: "";
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background: rgba(0,0,0,.1);
+        z-index: -1;
+      }
+      .input {
+        width: 450px;
+        min-height: 70px;
+        line-height: 22px;
+        padding: 2px 50px 2px 10px;
+        color: white;
+        background: rgba(86, 86, 86, .4);
+        border: 1px solid #f7f7f7;
+        outline: none;
+        margin-left: 50%;
+        margin-top: 200px;
+        transform: translateX(-50%);
+        border-radius: 4px;
+        font-size: 16px;
+        resize: vertical;
+      }
+      .input::placeholder {
+        color: white;
+        opacity: .7;
+      }
+      .search-btn {
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        left: calc(50vw + 220px);
+        top: 228px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea
+      class="input"
+      id="content-input"
+      row="5"
+    ></textarea>
+    <svg class="search-btn" id="svg-ele" t="1606703733222" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7064" class="search-btn"><path d="M883.626667 823.04l-145.066667-144.64A337.92 337.92 0 0 0 810.666667 469.333333a341.333333 341.333333 0 1 0-341.333334 341.333334 337.92 337.92 0 0 0 209.066667-72.106667l144.64 145.066667a42.666667 42.666667 0 0 0 60.586667 0 42.666667 42.666667 0 0 0 0-60.586667zM213.333333 469.333333a256 256 0 1 1 256 256 256 256 0 0 1-256-256z" p-id="7065" fill="#ffffff"></path></svg>
+    <div style="text-align:center;">
+      <span id="dl-tips" style="display: none">生成文件中，请稍后......</span>
+      <a id="dl-completed"  download="result.csv" href="/result.csv" style="display: none">下载文件</a>
+    </div>
+  </body>
+  <script>
+    function dl_file() {
+      document.getElementById('dl-tips').style.display = 'inline'
+      document.getElementById('dl-completed').style.display = 'none'
+      const val = document.getElementById('content-input').value
+      if (!val) {
+        alert("请先输入公司名称，以换行分割")
+      }
+      const data = val.split('\n').filter(i => i)
+      fetch('/api/qichacha/gen', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({ data })
+      }).then(data => data.json()).then(data => {
+        console.log(data)
+        if (!data.result) {
+          document.getElementById('dl-tips').style.display = 'none'
+          document.getElementById('dl-completed').style.display = 'inline'
+        }
+      })
+    }
+    function timer () {
+      const req = () => {
+        fetch('/api/qichacha/check', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({})
+        })
+        .then(data => data.json())
+        .then(data => {
+          if (!data.end) {
+            return req()
+          } else {
+            document.getElementById('dl-tips').style.display = 'none'
+            document.getElementById('dl-completed').style.display = 'inline'
+          }
+        })
+      }
+    }
+    document.getElementById('svg-ele').addEventListener('click', dl_file)
+  </script>
+</html>

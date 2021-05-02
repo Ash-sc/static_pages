@@ -8,7 +8,7 @@ router.post('/gen', function(req, res) {
   const { data } = req.body
   console.log(data)
   const names = data.join(' ')
-  const cmd = `/usr/local/opt/python@3.9/bin/python3.9 /Users/shenchuang/Documents/qichacha_spider/spider.py ${names}`
+  const cmd = `python3 /root/static_pages/download/spider.py ${names}`
 
   try {
     execa.shellSync(cmd)
